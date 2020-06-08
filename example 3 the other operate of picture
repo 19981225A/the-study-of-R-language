@@ -1,0 +1,88 @@
+#1. 添加了最佳拟合曲线的散点图
+attach(mtcars)
+plot(wt,mpg,main="Basic Scatter plot of MPG vs. Weight",xlab="Car Weight",ylab="Miles per Gallon",pch=19)
+abline(lm(mpg~wt),col="red",lwd=2,lty=1)
+install.packages("car")
+library("car")
+scatterplot(mpg~wt|cyl,data=mtcars,lwd=2,main="Scatter plot of MPG vs. Weight by Cylinders",xlab="Weight of Car",ylab="Miles per Gallon",boxplots="xy")
+#2. 散点图矩阵
+pairs(~mpg+disp+drat+wt,data=mtcars,main="Basic Scatter Plot Matrix")
+scatterplotMatrix(~mpg+disp+drat+wt,data=mtcars,main="Scatter Plot Matrix via car Package")
+cor(mtcars[c("mpg","wt","disp","drat")])
+install.packages("gclus")
+library("gclus")
+mydata <- mtcars[c("mpg","wt","disp","drat")]
+mydata.corr <- abs(cor(mydata))
+mycolors <- dmat.color(mydata.corr)
+myorder <- order.single(mydata.corr)
+cpairs(mydata,myorder,panel.colors=mycolors,gap=0.5,main="Variable Ordered and Colored by Correlation")
+#3. 高密度散点图
+set.seed(1234)
+n <- 10000
+c1 <- matrix(rnorm(n,mean=0,sd=0.5),ncol=2)
+c2 <- matrix(rnorm(n,mean=3,sd=2),ncol=2)
+mydata <- rbind(c1,c2)
+mydata <- as.data.frame(mydata)
+names(mydata) <- c("x","y")
+with(mydata,plot(x,y,pch=19,main="Scatter plot with 10000 observations"))
+with(mydata,smoothScatter(x,y,main="Scatterplot Colored by Smoothed Densities"))
+install.packages("hexbin")
+library("hexbin")
+with(mydata,{
+             bin <- hexbin(x,y,xbins=50)
+			 plot(bin,main="Hexagonal Binning with 10000 Observations")})
+install.packages("IDPmisc")
+library("IDPmisc")
+with(mydata,iplot(x,y,main="Image Scatter Plot with Color Indicating Density"))
+#4. 三维散点图
+install.packages("scatterplot3d")
+library("scatterplot3d")
+with(mtcars,scatterplot3d(wt,disp,mpg,main="Basic 3D Scatter Plot"))
+with(mtcars,scatterplot3d(wt,disp,mpg,pch=16,highlight.3d=TRUE,type="h",main="3D Scatter Plot with vertical lines"))
+
+install.packages("rgl")
+library("rgl")
+with(mtcars,plot3d(wt,disp,mpg,col="red",size=5))
+
+install.packages("Rcmdr")
+library("Rcmdr")
+with(mtcars,scatter3d(wt,disp,mpg))
+
+#5. 气泡图
+attach(mtcars)
+r <- sqrt(disp/pi)
+symbols(wt,mpg,circle=r,inches=0.30,fg="white",bg="lightblue",main="Bubble Plot with point size",xlab="Weight of Car",ylab="Miles per Gallon")
+text(wt,mpg,rownames(mtcars),cex=0.6)
+detach(mtcars)
+#6. 折线图
+opar <- par(no.readonly=TRUE)
+par(mfrow=c(1,2))
+t1 <- subset(Orange,Tree==1)
+with(t1,plot(age,circumference,xlab="Age (days)",ylab="Circumference (mm)",main="Orange Tree 1 Growth"))
+with(t1,plot(age,circumference,xlab="Age (days)",ylab="Circumference (mm)",main="Orange Tree 1 Growth",type="b"))
+par(opar)
+
+Orange$Tree <- as.numeric(Orange$Tree)
+ntrees <- max(Orange$Tree)
+xrange <- range(Orange$age)
+yrange <- range(Orange$circumference)
+plot(xrange,yrange,type="n",xlab="Age (days)",ylab="Circumference (mm)")
+colors <- rainbow(ntrees)
+linetype <- c(1:ntrees)
+plotchar <- seq(18,18+ntrees,1)
+for(i in 1:ntrees) {
+                    tree <- subset(Orange,Tree==i)
+					lines(tree$age,tree$circumference,type="b",lwd=2,lty=linetype[i],col=colors[i],pch=plotchar[i])}
+title("Tree Growth","example of line plot")
+legend(xrange[1],yrange[2],1:ntrees,cex=0.8,col=colors,pch=plotchar,lty=linetype,title="Tree")
+#7. 相关图
+options(digits=2)
+cor(mtcars)
+install.packages("corrgram")
+library("corrgram")
+corrgram(mtcars,order=TRUE,lower.panel=panel.shade,upper.panel=panel.pie,text.panel=panel.txt,main="Correlogram of mtcars intercorrelations")
+#8. 马赛克图
+ftable(Titanic)
+install.packages("vcd")
+library("vcd")
+mosaic(Titanic,shade=TRUE,legend=TRUE)
