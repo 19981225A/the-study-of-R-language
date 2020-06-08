@@ -1,0 +1,34 @@
+一：example 1  (about how to configuration parameter of picture)
+（1）
+x<-c(1:10);
+y<-x;
+z<=10/x;  //先定义三个向量
+opar<-par(no.readonly=TRUE); //利用这句话是用来保持当前的环境的变量，接下会使用par函数来改变一些参数，改变完了之后，用plot来作图，就会
+//都按照新的参数来作图，所以我们把当前配置的参数赋值给opar,后面如果想用原来的参数作图就通过par(opar)来实现即可。
+par(mar=c(5,4,4,8)+0.1);
+plot(x,y,type="b",pch=21,col="red",yaxt="n",lty=3,ann=FALSE)
+lines(x,z,type="b",pch=22,col="blue",lty=2)
+axis(2,at=x,labels=x,col.axis="red",las=2)
+axis(4,at=z,labels=round(z,digits=2),col.axis="blue",las=2,cex.axis=0.7,tck=-0.01)
+mtext("y=10/x",side=4,line=3,cex.lab=1,las=2,col="blue")
+title("An Example of Creative Axes",xlab="x value",ylab="Y=X")
+par(opar)
+
+
+（2）
+dose<-c(20,30,40,45,60);
+drugA<-C(16,20,27,40,60);
+drugB<-c(15,18,25,31,40);
+opar<-par(no.readonly=TRUE);
+par(lwd=2,cex=1.5,font.lab=2);
+plot(dose,drugA,type="b",pch=15,lty=1,col="red",ylim=c(0,60),main="Drug A vs.Drug B")
+lines(dose,drugB,type="b",pch=17,lty=2,col="blue")
+abline(h=c(30),lwd=1.5,lty=2,col="gray")
+library("Hmisc")
+minor.tick(nx=3,ny=3,tick.ratio=0.5)
+legend("topleft",inset=0.05,title="Drug type",c("A","B") ,lty=c(1,2),pch=c(15,17),col=c("red","yellow") )
+text(dose,drugA,drugA,cex=0.6,pos=4)
+par(opar)
+
+
+
