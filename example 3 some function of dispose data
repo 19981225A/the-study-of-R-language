@@ -1,0 +1,185 @@
+#2.描述性统计变量
+rawdata <- read.csv("student_score.csv",header=TRUE,sep=",",row.names="name")
+dim(rawdata)
+head(rawdata)
+tail(rawdata)
+fivenum(rawdata[,3])
+sapply(rawdata[,3:5],mean)
+apply(rawdata[,3:5],2,mean)
+apply(rawdata[,3:5],1,mean)
+aggregate(rawdata[,3:5],by=list(gender=rawdata$gender),max)
+dstats <- function(x)(c(max=max(x),min=min(x)))
+by(rawdata[,3:3],rawdata$gender,dstats)
+#3.频数表和列联表
+library("vcd")
+rawdata <- Arthritis
+mytable1 <- with(rawdata,table(Improved))
+prop.table(mytable1)
+mytable2 <- with(rawdata,table(Sex,Improved))
+margin.table(mytable2,1)
+margin.table(mytable2,2)
+addmargins(mytable2)
+addmargins(mytable2,1)
+addmargins(mytable2,2)
+mytable3 <- with(rawdata,table(Treatment,Sex,Improved))
+mytable4 <- xtabs(~Sex+Improved,data=rawdata)
+mytable5 <- with(rawdata,ftable(Sex,Improved))
+
+chisq.test(mytable2)
+mytable6 <- with(rawdata,table(Treatment,Improved))
+chisq.test(mytable6)
+fisher.test(mytable6)
+
+assocstats(mytable6)
+
+#4.相关系数和协方差
+states <- state.x77[,1:6]
+cov(states)
+cor(states)
+cor(states,method="spearman")
+install.packages("ggm")
+library("ggm")
+pcor(c(1,5,2,3,6),cov(states))
+cor.test(states[,3],states[,5])
+install.packages("psych")
+library("psych")
+corr.test(states,use="complete",method="spearman")
+#5. t检验
+library("MASS")
+t.test(Prob~So,data=UScrime)
+with(UScrime,t.test(U1,U2,paired=TRUE))
+#6. 组间差异的非参数检验
+wilcox.test(Prob~So,data=UScrime)
+
+#1.R语言简单线性回归
+myfit <- lm(weight~height,data=women)
+summary(myfit) /用来查看拟合结果的摘要信息
+fitted(myfit) /返回模型的预测值
+residuals(myfit) /得到预测值减去真实值之后的误差
+plot(women$height,women$weight,xlab="Height",
+	ylab="Weight")
+abline(myfit) / 
+#abline和lines之间的区别，abline做的是回归线，输入的参数是一个线性回归模型，而lines一般做的是连线图，输入的是点x,y向量
+#2.R语言多项式回归
+myfit2 <- lm(weight~height+I(height^2),
+	data=women)
+summary(myfit2)
+fitted(myfit2)
+residuals(myfit2)
+plot(women$height,women$weight,xlab="Height",
+	ylab="Weight")
+lines(women$height,fitted(myfit2))
+
+#3.R语言多元线性回归
+states <- as.data.frame(state.x77[,c("Murder",
+	"Population","Illiteracy","Income","Frost")])
+myfit3 <- lm(Murder~Population+Illiteracy+
+	Income+Frost,data=states)
+summary(myfit3)
+plot(states$Murder,fitted(myfit3)
+	,xlab="Murder",ylab="Prediction")
+#4.有交互项的多元线性回归
+myfit4 <- lm(mpg~hp+wt+hp:wt,data=mtcars)
+summary(myfit4)
+plot(mtcars$mpg,fitted(myfit4))
+#5.回归诊断
+myfit <- lm(weight~height,data=women)
+par(mfrow=c(2,2))
+plot(myfit)
+fit2 <- lm(weight~height+I(height^2)
+	,data=women)
+par(mfrow=c(2,2))
+plot(fit2)
+
+#6.异常观测点
+library("car")
+outlierTest(fit2)
+plot(hatvalues(fit2),main=
+	"Index plot of Hat Values")
+cutoff <- 4/(nrow(women)-length
+	(fit2$coefficients)-1)
+plot(fit2,which=4,cook.levels=cutoff)
+abline(h=cutoff,lty=2,col="red")
+influencePlot(fit2,main="Influence Plot",
+	sub="Circle size is proportional to cook's distance")
+#7.选择最佳回归模型
+fit1 <- lm(Murder~Population+Illiteracy+
+	Income+Frost,data=states)
+fit2 <- lm(Murder~Population+Illiteracy
+	,data=states)
+anova(fit1,fit2)
+AIC(fit1,fit2)
+library("MASS")
+stepAIC(fit1,diection="backward")
+#8.模型验证
+install.packages("bootstrap")
+library("bootstrap")
+shrinkage <- function(fit,k=10) {
+         require(bootstrap)
+		 theta.fit <- function(x,y){lsfit(x,y)}
+		 theta.predict <- function(fit,x){cbind(1,x)%*%fit$coef}
+		 x <- fit$model[,2:ncol(fit$model)]
+		 y <- fit$model[,1]
+		 results <- crossval(x,y,theta.fit,theta.predict,ngroup=k)
+		 r2 <- cor(y,fit$fitted.values)^2
+		 r2cv <- cor(y,results$cv.fit)^2
+		 cat("Original R-square = ",r2,"\n")
+		 cat(k,"Fold Cross-Validated R-square = ",r2cv,"\n")}
+shrinkage(fit1)
+
+relweights <- function(fit,...){
+          R <- cor(fit$model)
+		  nvar <- ncol(R)
+		  rxx <- R[2:nvar,2:nvar]
+		  rxy <- R[2:nvar,1]
+		  svd <- eigen(rxx)
+		  evec <- svd$vectors
+		  ev <- svd$values
+		  delta <- diag(sqrt(ev))
+		  lambda <- evec %*% delta %*% t(evec)
+		  lambdasq <- lambda^2
+		  beta <- solve(lambda) %*% rxy
+		  rsquare <- colSums(beta^2)
+		  rawwgt <- lambdasq %*% beta^2
+		  import <- (rawwgt/rsquare)*100
+		  lbls <- names(fit$model[2:nvar])
+		  rownames(import) <- lbls
+		  colnames(import) <- "Weights"
+		  barplot(t(import),names.arg=lbls,ylab="% of R-square",xlab="Predictor",)
+		  return(import)}
+relweights(fit1,col="lightgrey")
+
+#1. Logistic回归
+marriage <- read.csv("marriage.csv",header=T,sep=",")
+fit.full <- glm(yn~gender+age+yearsmarried+children+religiousness+education+occupation+rating,data=marriage,family=binomial())
+summary(fit.full)
+fit.reduced <- glm(yn~age+yearsmarried+religiousness+rating,data=marriage,family=binomial())
+summary(fit.reduced)
+AIC(fit.reduced,fit.full)
+coef(fit.reduced)
+
+testdata <- data.frame(rating=c(1,2,3,4,5),age=mean(marriage$age),yearsmarried=mean(marriage$yearsmarried),religiousness=mean(marriage$religiousness))
+testdata
+testdata$prob <- predict(fit.reduced,newdata=testdata,type="response")
+testdata
+
+testdata <- data.frame(rating=mean(marriage$rating),age=seq(17,57,10),yearsmarried=mean(marriage$yearsmarried),religiousness=mean(marriage$religiousness))
+testdata
+testdata$prob <- predict(fit.reduced,newdata=testdata,type="response")
+testdata
+
+fit <- glm(yn~age+yearsmarried+religiousness+rating,data=marriage,family=binomial())
+
+#2. 泊松回归
+install.packages("robust")
+library("robust")
+data(breslow.dat,package="robust")
+names(breslow.dat)
+summary(breslow.dat[c(6,7,8,10)])
+fit <- glm(sumY~Base+Age+Trt,data=breslow.dat,family=poisson())
+summary(fit)
+coef(fit)
+
+install.packages("qcc")
+library("qcc")
+qcc.overdispersion.test(breslow.dat$sumY,type="poisson")
