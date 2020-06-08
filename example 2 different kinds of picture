@@ -25,13 +25,17 @@ spine(rawdata1,main="Students Score",ylab="Name")//要使用vcd包
 slices<-c(10,12,4,16,8);
 label<-c("US","UK","Australia","Germany","France")
 pie(slices,labels=label,main="Simple Pie Chart")
+//slices每一个表量的值决定了其所占据的扇形的大小，labels为每一个扇形块的标签
 pct<-round(slices/sum(slices)*100)
-label2<-paste(label," ",pct,"%",sep="")
+label2<-paste(label," ",pct,"%",sep="")//自定义标签内容
 pie(slices,labels=label2,col=rainbow(length(label2)),main="Pie with Percentages")
+//rainbow()函数是传入不同的数字，来决定对应的颜色，这里的数字是按照label2标签的长度来的
 install.packages("plotrix")
 library("plotrix")
 pie3D(slices,labels=label,explode=0.1,main="3D pie Chart")
+//和前面函数参数一样，但是是以3D的形式显示出来的，exploed是每一个扇形块之间的距离
 fan.plot(slices,labels=label,main="Fan Plot")
+//是将一个扇形按照不同大小分成多个小扇形
 
 （6）直方图
 hist(rawdata$english)
