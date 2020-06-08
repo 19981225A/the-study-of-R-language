@@ -1,0 +1,12 @@
+library("vcd")  //载入文件
+rawdata<-read.csv("student_score.csv",header=TRUE,sep=",",row.names="name") //读取相关数据
+barplot(rawdata[,c("english")],main="Students English Score",xlab="Name",ylab="score",names.arg=rownames(rawdata))
+//
+barplot(rawdata[,c("english")],main="Students English Score",xlab="Name",ylab="score",names.arg=rownames(rawdata),horiz=TRUE)
+
+rawdata1<-t(as.matrix(rawdata[,c("english","math","chemistry")]))
+barplot(rawdata1,main="Students Score",xlab="Name",ylab="Score",names.arg=colnames(rawdata1),col=c("red","yellow","green"),legend=c("English","Math","Chemistry"))
+rawdata$total<-apply(rawdata[,3:5],1,sum)
+barplot(rawdata$total,main="Students Score",xlab="Name",ylab="Score",names.arg=rownames(rawdata))
+
+spine(rawdata1,main="Students Score",ylab="Name")
