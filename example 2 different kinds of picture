@@ -38,8 +38,10 @@ fan.plot(slices,labels=label,main="Fan Plot")
 //是将一个扇形按照不同大小分成多个小扇形
 
 （6）直方图
-hist(rawdata$english)
+hist(rawdata$english,breaks=seq(60,100,5),col="red",xlab="English Score",main="Colored histgram with 6 bins")
+hist(rawdata$english)//传入一组数据，函数将这些数据划分为几个范围，x轴从左往右每一个柱代表着一个范围，柱的高度代表着属于该范围内的数据的数量
 hist(rawdata$english,breaks=6,col="red",xlab="English Score",main="Colored histgram with 6 bins")
+//breaks等于画直方图的时候建议分组的数目
 hist(rawdata$english,freq=FALSE,breaks=6,col="red",xlab="English Score",main="Histogram,rug plot")
 lines(density(rawdata$english),col="blue",lwd=2)
 box()
