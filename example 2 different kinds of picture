@@ -1,12 +1,72 @@
+（1）简单条形图
 library("vcd")  //载入文件
 rawdata<-read.csv("student_score.csv",header=TRUE,sep=",",row.names="name") //读取相关数据
 barplot(rawdata[,c("english")],main="Students English Score",xlab="Name",ylab="score",names.arg=rownames(rawdata))
-//
+//首先是绘制简单的条形图，只选择一列参数，绘制结果为x轴从左往右依次为各个数据，y轴的高度代表每个图形的值，最后一个选项是是设置x轴每一个柱下面的标签为rawdata的行名称
 barplot(rawdata[,c("english")],main="Students English Score",xlab="Name",ylab="score",names.arg=rownames(rawdata),horiz=TRUE)
+//horiz=TRUE是将图形垂直于y轴，平行于x轴放置，与第三行的相反
 
-rawdata1<-t(as.matrix(rawdata[,c("english","math","chemistry")]))
+（2）堆砌条形图和分组条形图
+rawdata1<-t(as.matrix(rawdata[,c("english","math","chemistry")]))//在rawdata中取出三列数据，并将其转置，并转化为矩阵
 barplot(rawdata1,main="Students Score",xlab="Name",ylab="Score",names.arg=colnames(rawdata1),col=c("red","yellow","green"),legend=c("English","Math","Chemistry"))
-rawdata$total<-apply(rawdata[,3:5],1,sum)
-barplot(rawdata$total,main="Students Score",xlab="Name",ylab="Score",names.arg=rownames(rawdata))
+//rawdata1是一个三行多列的矩阵，画出的结果是x轴从左往右依次很多列，每一列从下往上由3个方块组成，每个方块的长度对应每一列的三个数，
+x轴标签设置为矩阵的每个列名称，每列的三个方块颜色用color赋值为三种，legend是添加一个图例
 
-spine(rawdata1,main="Students Score",ylab="Name")
+（3）特征条形图
+rawdata$total<-apply(rawdata[,3:5],1,sum) //新增一列的值为对应行的三列数之和
+barplot(rawdata$total,main="Students Score",xlab="Name",ylab="Score",names.arg=rownames(rawdata))
+//类似于第四行的简单条形图
+
+(4)棘状图
+spine(rawdata1,main="Students Score",ylab="Name")//要使用vcd包
+//结果是x轴每一列为rawdata1矩阵中的一行数，总共有三列，这三列每一个方块大小对应其取值
+
+（5）饼图
+slices<-c(10,12,4,16,8);
+label<-c("US","UK","Australia","Germany","France")
+pie(slices,labels=label,main="Simple Pie Chart")
+pct<-round(slices/sum(slices)*100)
+label2<-paste(label," ",pct,"%",sep="")
+pie(slices,labels=label2,col=rainbow(length(label2)),main="Pie with Percentages")
+install.packages("plotrix")
+library("plotrix")
+pie3D(slices,labels=label,explode=0.1,main="3D pie Chart")
+fan.plot(slices,labels=label,main="Fan Plot")
+
+（6）直方图
+hist(rawdata$english)
+hist(rawdata$english,breaks=6,col="red",xlab="English Score",main="Colored histgram with 6 bins")
+hist(rawdata$english,freq=FALSE,breaks=6,col="red",xlab="English Score",main="Histogram,rug plot")
+lines(density(rawdata$english),col="blue",lwd=2)
+box()
+
+（7）核密度图
+d<-density(rawdata$english)
+plot(d,main="Density of English Score")
+polygon(d,col="red",border="blue")
+
+（8）箱线图
+boxplot(rawdata$english,main="Box plot",ylab="Score")
+boxplot(rawdata[,c("english","math","chemistry")],main="Box plot",ylab="Score")
+boxplot(rawdata[,c("english","math","chemistry")],notch=TRUE,varwidth=TRUE,col="red",main="Box plot",ylab="Score")
+install.packages("vioplot")
+library("vioplot")
+vioplot(rawdata[1:5,c("english")],rawdata[6:10,c("english")],names=c("English","English"),col="gold")
+
+（9）点图
+dotchart(rawdata[,c("english")],labels=rownames(rawdata),cex=0.7,main="Dotchart of score",xlab="score")
+dotchart(rawdata[order(rawdata[,c("english")]),c("english")],labels=rownames(rawdata)[order(rawdata[,c("english")])])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
